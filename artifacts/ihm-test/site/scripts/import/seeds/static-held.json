@@ -1,0 +1,39 @@
+{
+  "_comment": "Files production no longer serves (404 on live, checked by parity). Not copied; rule 1/D11: gone stays gone.",
+  "paths": [
+    "/pdf/Appendix076_BNCurriculum.pdf",
+    "/pdf/IHM_Agent_List_2025.pdf",
+    "/pdf/IHM_Course_Fees_2025.pdf",
+    "/pdf/policies/Academic_Honesty_and_Integrity_Policy_OLD(12-June-2025-ADR).pdf",
+    "/pdf/policies/Academic_Honesty_and_Integrity_Policy_old.pdf",
+    "/pdf/policies/Academic_Honesty_and_Integrity_Policy_old2.pdf",
+    "/pdf/policies/IHM_Fees_Charges_and_Refunds_for_Domestic_Students_Policy_OLD(17-June-2025-ADR).pdf",
+    "/pdf/policies/Professional_Experience_Policy_old.pdf",
+    "/pdf/procedures/Academic_Honesty_and_Integrity_Procedure(old-12-mar-2026).pdf",
+    "/pdf/procedures/Academic_Honesty_and_Integrity_Procedure_OLD(12-June-2025-ADR).pdf",
+    "/pdf/procedures/Admission_Enrolment_Procedure_old(15-03-2024).pdf",
+    "/pdf/procedures/Changes_to_Enrolment_Procedure_old(15-03-2024).pdf",
+    "/pdf/procedures/Fees_Charges_and_Refunds_Procedure_OLD(21-MAr-2024-ADR).pdf",
+    "/pdf/procedures/Fees_Charges_and_Refunds_Procedure_old(15-Mar-2023).pdf",
+    "/pdf/procedures/IHM_Fees_Charges_and_Refunds_for_Domestic_Students_Procedure_OLD(17-june-2025).pdf",
+    "/pdf/procedures/International_Student_Transfer_Request_Assessment_Procedure_old(15-Mar-2023-ADR).pdf",
+    "/pdf/procedures/Library_Procedure_old.pdf",
+    "/pdf/procedures/Marketing_of_Courses_to_Offshore_and_Overseas_Students_Procedure_old(15-Mar-2024).pdf",
+    "/pdf/procedures/Marketing_of_Courses_to_Offshore_and_Overseas_Students_Procedure_old(21-Mar-2024-ADR).pdf",
+    "/pdf/procedures/Offshore_Delivery_Procedure_old.pdf",
+    "/pdf/procedures/Student_Academic_Progression_Procedure_old(15-Mar-2024).pdf",
+    "/pdf/procedures/Student_Academic_Progression_Procedure_old(21-Mar-2023-ADR).pdf",
+    "/pdf/procedures/Student_Selection_and_Admission_Procedure_old.pdf",
+    "/pdf/procedures/Student_Support_Services_Procedure_OLD(21-Mar-2024-ADR).pdf",
+    "/pdf/procedures/Student_Support_Services_Procedure_old(15-Mar-2024).pdf",
+    "/pdf/procedures/Student_Support_Services_Procedure_old.pdf"
+  ],
+  "missingOnServerOnly": {
+    "_comment": "200 on live but not in the repo: fetch from the production server before cutover",
+    "paths": [
+      "/pdf/financial-standing/IHM_Statement_of_financial_standing_2020-21.pdf",
+      "/pdf/financial-standing/IHM_Statement_of_financial_standing_2021-22.pdf",
+      "/pdf/financial-standing/IHM_Statement_of_financial_standing_2022-23.pdf"
+    ]
+  }
+}

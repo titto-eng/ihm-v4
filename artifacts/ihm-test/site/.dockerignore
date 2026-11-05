@@ -1,0 +1,20 @@
+# Keep the Docker build context small and free of secrets and local data (docs/DEPLOYMENT.md).
+# Secrets reach the build only through `--secret id=env,src=.env.production` (see Dockerfile).
+.env
+.env.*
+!.env.example
+node_modules
+.next
+.git
+.data
+media
+test-results
+playwright-report
+coverage
+handover
+Claude outputs
+scripts/import/out
+scripts/parity/out
+scripts/dev/out
+*.tsbuildinfo
+npm-debug.log*

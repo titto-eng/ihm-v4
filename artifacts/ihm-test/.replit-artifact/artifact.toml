@@ -1,0 +1,23 @@
+kind = "web"
+previewPath = "/"
+title = "IHM Test Website"
+description = "Full existing IHM Next.js and Payload website imported without redesign, with isolated test content and disabled live integrations."
+version = "1.0.0"
+id = "artifacts/ihm-test"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/", "/api" ]
+localPort = 24761
+
+[services.development]
+run = "cd site && node scripts/replit-run.mjs dev"
+
+[services.production]
+build = [ "bash", "-c", "if [ -d site ]; then cd site; else cd artifacts/ihm-test/site; fi && npm ci --no-audit --no-fund && node scripts/replit-assets.mjs download && node scripts/replit-run.mjs publish-build && cp -r public .next/standalone/ && cp -r .next/static .next/standalone/.next/" ]
+run = [ "bash", "-c", "if [ -d site ]; then cd site; else cd artifacts/ihm-test/site; fi && node scripts/replit-run.mjs standalone" ]
+
+[services.env]
+PORT = "24761"
+BASE_PATH = "/"

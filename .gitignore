@@ -54,3 +54,6 @@ Thumbs.db
 .cache/
 .local/
 /generated-artifacts/
+/artifacts/ihm-test/site/public/
+/artifacts/ihm-test/site/.env*
+!/artifacts/ihm-test/site/.env.example

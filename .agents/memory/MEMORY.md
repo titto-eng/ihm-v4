@@ -1,1 +1,2 @@
 - [IHM test-only import](ihm-test-scope.md) — preserve the existing full site; isolate all test hosting and data from live infrastructure.
+- [Import hosting constraints](replit-import-hosting.md) — npm isolation, artifact working directory, cloud-storage field naming, and test-fixture requirements.

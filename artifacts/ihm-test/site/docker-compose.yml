@@ -1,0 +1,28 @@
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ihm
+    ports: ['5433:5432'] # 5432 is taken by a Homebrew Postgres on this Mac; dev .env may point at either
+    volumes: [pgdata:/var/lib/postgresql/data]
+  portal-mysql:
+    # Fixture copy of ihmedu_portal for lib/portal tests (never the real DB)
+    image: mysql:8
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ihmedu_portal
+      MYSQL_USER: portal_ro
+      MYSQL_PASSWORD: portal_ro
+    ports: ['${PORTAL_FIXTURE_PORT:-3307}:3306'] # set PORTAL_FIXTURE_PORT in .env when 3307 is taken (WAMP's MariaDB uses 3307)
+    volumes: [mysqldata:/var/lib/mysql]
+  mailpit:
+    image: axllent/mailpit
+    restart: unless-stopped
+    ports: ['8025:8025', '1025:1025']
+volumes:
+  pgdata:
+  mysqldata:

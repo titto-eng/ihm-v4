@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "ihm-web",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "/Users/allenrobinhubert/Projects/office/HCI/ihm-web",
+      "port": 3000
+    }
+  ]
+}

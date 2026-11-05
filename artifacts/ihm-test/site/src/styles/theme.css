@@ -1,0 +1,219 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/typography';
+@import 'tw-animate-css';
+
+/*
+  Design tokens (05-design-system §4.1): the IHM brand coral (#f15c4e) and gold (#edab37) with a warm white and plum ink.
+  IHNA changes only the colour values in this file (D7).
+  Fonts are provided by next/font in app/(site)/layout.tsx as CSS variables.
+*/
+@theme {
+  /* IHM brand: coral #f15c4e and gold #edab37 (from the IHM logo), on a warm white with a deep plum ink. */
+  --color-brand-coral: #f15c4e;
+  --color-brand-gold: #edab37;
+  --color-background: hsl(36 60% 98%);
+  --color-foreground: hsl(348 35% 13%);
+  --color-card: hsl(0 0% 100%);
+  --color-card-foreground: hsl(348 35% 13%);
+  --color-muted: hsl(35 70% 94%);
+  --color-muted-foreground: hsl(350 12% 36%);
+  --color-border: hsl(30 38% 87%);
+  /* Brand coral. Filled with ink text (5.2:1); never as text on light surfaces (3.2:1). */
+  --color-primary: hsl(5 85% 63%);
+  --color-primary-foreground: hsl(0 0% 100%);
+  /* Deeper coral for text, links and emphasis on light surfaces: 5.5:1 on background, 5.2:1 on muted (DEC-16). */
+  --color-primary-strong: hsl(5 72% 44%);
+  /* Brand gold. Ink text on gold is 8.5:1; gold text only on ink. */
+  --color-secondary: hsl(38 83% 57%);
+  --color-secondary-foreground: hsl(348 35% 13%);
+  /* Deeper gold for text on light surfaces (5.4:1). */
+  --color-secondary-strong: hsl(33 85% 32%);
+  --color-accent: hsl(350 65% 38%);
+  --color-accent-foreground: hsl(0 0% 100%);
+  --color-ink: hsl(348 35% 13%);
+  --color-ink-foreground: hsl(36 60% 98%);
+  --color-destructive: hsl(0 72% 45%);
+  --color-ring: hsl(5 85% 63%);
+  --color-popover: hsl(0 0% 100%);
+  --color-popover-foreground: hsl(348 35% 13%);
+  --color-input: hsl(30 30% 80%);
+  --color-destructive-foreground: hsl(0 0% 100%);
+  /* Slightly lifted ink for panels that sit on ink. */
+  --color-ink-raised: hsl(348 32% 19%);
+  /* Soft brand tints for section washes and icon chips. */
+  --color-blush: hsl(6 100% 96%);
+  --color-sand: hsl(40 92% 93%);
+  --color-chart-1: hsl(5 85% 63%);
+  --color-chart-2: hsl(38 83% 57%);
+  --color-chart-3: hsl(350 65% 38%);
+  --color-chart-4: hsl(348 35% 13%);
+  --color-chart-5: hsl(28 60% 70%);
+
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-sans: var(--font-bricolage), system-ui, sans-serif;
+  --font-mono: var(--font-spline-mono), ui-monospace, monospace;
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-card: 1.75rem;
+
+  --text-display-xl: clamp(3rem, 8.4vw, 7.4rem);
+  --text-display-xl--line-height: 0.92;
+  --text-display-lg: clamp(2.6rem, 7vw, 6rem);
+  --text-display-lg--line-height: 0.95;
+  --text-display-md: clamp(2.2rem, 5vw, 4.2rem);
+  --text-display-md--line-height: 0.98;
+  --text-display-stat: clamp(3rem, 8vw, 6rem);
+  --text-display-stat--line-height: 1;
+
+  --container-site: 1320px;
+  --container-prose-site: 72ch;
+
+  --animate-rise: rise 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+@keyframes reveal-in {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* BON display face: Fraunces light, optical size 144. */
+@utility display {
+  font-family: var(--font-display);
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  font-optical-sizing: auto;
+}
+
+/* Mono eyebrow / label. */
+@utility label-mono {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1.25;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+
+/* Brand sunrise: coral to gold glow (behind the split hero image, banners). */
+@utility bg-sunrise-glow {
+  background-image:
+    radial-gradient(120% 90% at 80% 10%, hsl(38 83% 57% / 0.75), transparent 55%),
+    radial-gradient(90% 80% at 10% 90%, hsl(350 65% 38% / 0.35), transparent 60%),
+    linear-gradient(135deg, hsl(5 85% 63%), hsl(20 85% 60%) 55%, hsl(38 83% 57%));
+}
+
+/* Brand gradient for thin rules, top borders and text accents. */
+@utility bg-brand-gradient {
+  background-image: linear-gradient(90deg, var(--color-brand-coral), var(--color-brand-gold));
+}
+
+/* Soft page wash used behind compact heroes and tinted sections. */
+@utility bg-brand-wash {
+  background-image:
+    radial-gradient(60% 120% at 100% 0%, hsl(38 83% 57% / 0.22), transparent 70%),
+    radial-gradient(50% 110% at 0% 100%, hsl(5 85% 63% / 0.14), transparent 70%),
+    linear-gradient(180deg, hsl(36 70% 97%), hsl(30 80% 95%));
+}
+
+/* Warm ink panel with a coral/gold glow (CTA banners, dark sections). */
+@utility bg-ink-glow {
+  background-color: var(--color-ink);
+  background-image:
+    radial-gradient(70% 120% at 100% 0%, hsl(5 85% 63% / 0.35), transparent 60%),
+    radial-gradient(60% 120% at 0% 100%, hsl(38 83% 57% / 0.22), transparent 65%);
+}
+
+/* Brand coral band (School of Social Work "terracotta" sections, CTA bands). */
+@utility bg-coral-band {
+  background-color: var(--color-primary);
+  background-image:
+    radial-gradient(80% 120% at 100% 0%, hsl(38 83% 57% / 0.28), transparent 60%),
+    linear-gradient(120deg, hsl(5 85% 63%), hsl(5 72% 50%));
+}
+
+/* Scroll reveal only where view timelines exist, so content is never hidden without support. */
+@utility reveal {
+  @supports (animation-timeline: view()) {
+    animation: reveal-in 1s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 40%;
+  }
+}
+
+@layer base {
+  *, ::after, ::before { border-color: var(--color-border); }
+  .prose {
+    --tw-prose-body: var(--color-foreground);
+    --tw-prose-headings: var(--color-foreground);
+    --tw-prose-links: var(--color-primary-strong);
+    --tw-prose-bold: var(--color-foreground);
+    --tw-prose-bullets: var(--color-primary);
+    --tw-prose-counters: var(--color-primary-strong);
+    --tw-prose-quotes: var(--color-foreground);
+    --tw-prose-quote-borders: var(--color-primary);
+    --tw-prose-hr: var(--color-border);
+    --tw-prose-th-borders: var(--color-border);
+    --tw-prose-td-borders: var(--color-border);
+  }
+
+  html { scroll-behavior: smooth; }
+  /* Long URLs and e-mail addresses in content wrap instead of widening the page on phones. */
+  .prose :where(p, li, a, h2, h3, h4) { overflow-wrap: anywhere; }
+  .prose :where(td, th) { overflow-wrap: break-word; }
+  .prose li::marker { color: var(--color-primary); }
+  ::selection { background: hsl(38 83% 57% / 0.35); }
+  body { @apply bg-background font-sans text-foreground antialiased; }
+  h1, h2, h3, h4 { @apply font-display; text-wrap: balance; }
+  :focus-visible { @apply outline-2 outline-offset-2 outline-ring; }
+  @media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  }
+}
+
+/* Adjacent sections with the same background share their padding, so stacked blocks never leave a double gap.
+   Unlayered on purpose: it must beat the section's py-* utilities. */
+section[data-tone='default'] + section[data-tone='default'],
+section[data-tone='muted'] + section[data-tone='muted'],
+section[data-tone='card'] + section[data-tone='card'],
+section[data-tone='ink'] + section[data-tone='ink'] { padding-top: 0; }
+section[data-tone='default']:has(+ section[data-tone='default']),
+section[data-tone='muted']:has(+ section[data-tone='muted']),
+section[data-tone='card']:has(+ section[data-tone='card']),
+section[data-tone='ink']:has(+ section[data-tone='ink']) { padding-bottom: 3rem; }
+/* A section holding only a heading (a Rich block with one h2) belongs to the block after it. */
+section:has(> div > .prose > :is(h2, h3):only-child):has(+ section) { padding-bottom: 0.5rem; }
+section:has(> div > .prose > :is(h2, h3):only-child) .prose > :is(h2, h3):only-child { margin-bottom: 0; }
+
+@keyframes hero-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+/* Micro-credentials title ribbon: the list is rendered twice, so -50% loops seamlessly. */
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .motion-marquee { animation: none !important; } }
+/* Gentle bob for a mascot or illustration (e.g. Rishi on /talk-to-rishi/); use with motion-safe:. */
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+
+/* School of Social Work Fielda showcase (FieldaShowcase.client.tsx): the 6.5 s progress line, the panel and screen reveal, as on
+   the School's microsite. The progress pauses while the showcase is paused (pointer or focus inside, or the pause button). */
+/* School of Social Work sub-navigation menu (SchoolNav.client.tsx). */
+@keyframes ssw-menu-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+@keyframes fielda-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes fielda-panel-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes fielda-image-in { 0% { opacity: 0.3; transform: scale(0.955); } 55% { opacity: 1; transform: scale(1.028); } 100% { opacity: 1; transform: scale(1); } }
+.fielda-progress { transform-origin: left; animation: fielda-progress 6.5s linear forwards; }
+[data-paused] .fielda-progress { animation-play-state: paused; }
+.fielda-panel-in { animation: fielda-panel-in 0.72s cubic-bezier(0.2, 0.75, 0.25, 1); }
+.fielda-image-in { animation: fielda-image-in 1.05s cubic-bezier(0.2, 0.78, 0.2, 1) both; will-change: transform, opacity; }
+@media (prefers-reduced-motion: reduce) { .fielda-progress, .fielda-panel-in, .fielda-image-in { animation: none !important; } }
+
+/* IHM sun emblem (HeroRays): the rays turn slowly and the core breathes, so heroes and bands feel alive without distracting.
+   view-box origin = the SVG centre (200 200), where every ray is anchored. */
+@keyframes sun-spin { to { transform: rotate(360deg); } }
+@keyframes sun-breathe { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.09); opacity: 0.85; } }
+.sun-rays { transform-box: view-box; transform-origin: 50% 50%; animation: sun-spin 120s linear infinite; will-change: transform; }
+.sun-core { transform-box: view-box; transform-origin: 50% 50%; animation: sun-breathe 7s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .sun-rays, .sun-core { animation: none; } }

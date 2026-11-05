@@ -1,0 +1,179 @@
+# 05 · Design system
+
+## 1. Purpose
+The visual layer of the site: Tailwind v4 tokens (`src/styles/theme.css`), fonts, layout components (`src/components/layout/`), the audience switch (`src/components/audience/`), the course key-facts strip (`src/components/course/`) and the page templates (`src/components/templates/`). The look follows the IHM Australia brand: the logo's coral `#f15c4e` and gold `#edab37` on a warm white, with a deep plum ink (Fraunces display, mono labels). Block configs and renderers: `20-blocks.md`.
+
+## 2. Data model
+Owns no collections. Reads:
+- code constants: `src/content/nav.ts` (utility links, menu with groups, primary/secondary CTA, promo bar), `src/content/footer.ts` (columns, newsletter, Acknowledgement of Country, legal lines/links, social), `src/content/site.ts` (site name, short name, logo, phone, email, WhatsApp number, `allowedEmbedHosts`, `defaultFormKey`), `src/content/pages.ts` (each hardcoded page's `template` label), `src/content/campuses.ts` (campus contact cards);
+- `sectionFields` (`src/blocks/sectionFields.ts`) on every block: `tone` (default | card | muted | ink | sunrise), `spacing` (default | compact | none), `anchorId`;
+- `courses` (incl. `facts` / `factsInternational`, `sections`, `showStartDates`, `studentType`), the `courseShared` global, `lookups`, `staff`, `posts`, `events`, `testimonials` for the data-driven templates.
+
+## 3. Admin capabilities
+Marketing sets tone, spacing and anchor per block in course section layouts and `courseShared`, and edits each course's key facts (`courses.facts`, `courses.factsInternational`). Tokens, fonts, header, footer, templates and hardcoded pages are code: a developer edits the file and deploys.
+
+## 4. Front-end behaviour
+
+### 4.1 Tokens: `src/styles/theme.css`
+The only site stylesheet (imported by `src/app/(site)/layout.tsx`): `@import 'tailwindcss'`, `@plugin '@tailwindcss/typography'`, `@import 'tw-animate-css'`, then one `@theme` block of literal values. `src/app/(payload)/custom.scss` is the admin's stylesheet hook and is empty.
+
+| Token | Value | Token | Value |
+|---|---|---|---|
+| brand-coral, brand-gold | #f15c4e, #edab37 (the logo) | background | hsl(36 60% 98%) |
+| foreground, ink | hsl(348 35% 13%) | card, popover | hsl(0 0% 100%) |
+| muted | hsl(35 70% 94%) | muted-foreground | hsl(350 12% 36%) |
+| border | hsl(30 38% 87%) | input | hsl(30 30% 80%) |
+| primary (coral), ring | hsl(5 85% 63%) | primary-strong | hsl(5 72% 44%) |
+| secondary (gold) | hsl(38 83% 57%) | secondary-strong | hsl(33 85% 32%) |
+| accent (berry) | hsl(350 65% 38%) | destructive | hsl(0 72% 45%) |
+| ink-raised | hsl(348 32% 19%) | blush, sand (tints) | hsl(6 100% 96%), hsl(40 92% 93%) |
+| primary-, accent-, destructive-foreground | white | secondary-foreground | ink |
+| chart-1…5 | primary, secondary, accent, ink, hsl(28 60% 70%) | | |
+
+Contrast (WCAG ratios of these values): `primary` on `background` is 3.2:1 and fails AA, so text, links and emphasis on light surfaces use `primary-strong` (5.5:1 on background, 5.2:1 on muted; DEC-16); gold text on light surfaces uses `secondary-strong` (5.4:1). Filled primary buttons use `foreground` text on `primary` (5.2:1) and switch to `primary-strong` with white text on hover (5.7:1). `secondary` text is used on `ink` (8.5:1).
+
+- **Fonts** (`next/font/google` in `src/app/(site)/layout.tsx`, self-hosted at build, `display: 'swap'`): Fraunces (`opsz` + `SOFT` axes, normal and italic) → `--font-fraunces`; Bricolage Grotesque → `--font-bricolage`; Spline Sans Mono 400/500 → `--font-spline-mono`. The theme maps them to `--font-display` (→ Georgia, serif), `--font-sans` (→ system-ui) and `--font-mono` (→ ui-monospace). Body is `font-sans`; h1–h4 are `font-display` with `text-wrap: balance`.
+- **Utilities**: `display` (Fraunces, weight 300, tracking −0.02em, optical sizing auto); `label-mono` (mono, 0.75rem, uppercase, tracking 0.2em); `bg-sunrise-glow` (coral-to-gold glow behind the split hero image and the timeline steps); `bg-brand-gradient` (coral → gold, for rules, card top borders, eyebrow dots); `bg-brand-wash` (soft coral/gold wash behind heroes, title bands and the `sunrise` tone); `bg-ink-glow` (ink with a coral/gold glow: footer, CTA banners, alumni panel); `reveal` (view-timeline fade-in, only inside `@supports (animation-timeline: view())`, so content is never hidden where unsupported).
+- **Type scale**: `text-display-xl` clamp(3rem, 8.4vw, 7.4rem)/0.92 (hero h1); `text-display-lg` clamp(2.6rem, 7vw, 6rem)/0.95; `text-display-md` clamp(2.2rem, 5vw, 4.2rem)/0.98 (section h2, compact hero h1); `text-display-stat` clamp(3rem, 8vw, 6rem)/1.
+- **Containers**: `max-w-site` 1320px; `max-w-prose-site` 72ch; `Container narrow` = `max-w-4xl`.
+- **Radius**: sm 0.375rem, md 0.75rem, lg 1rem, xl 1.5rem, `rounded-card` 1.75rem; buttons and pills `rounded-full`.
+- **Motion**: `animate-rise` (0.7s, 14px rise; hero h1 and subheading); `reveal` (1s, 40px). Hover lifts are `-translate-y-0.5`. Under `prefers-reduced-motion: reduce` the base layer disables every animation, transition and smooth scroll.
+- **Section rhythm** (unlayered rules at the end of `theme.css`): a top-level `Section` carries `data-tone`; a section that follows one with the same tone drops its top padding and the earlier one keeps 3rem below, so stacked blocks leave one gap; a section holding only a heading (`Rich` with one h2/h3) sits 0.5rem above the block it introduces. The hero uses `data-tone="hero"` so the block after it keeps its padding.
+- **Base layer**: borders default to `border`; long words, URLs and e-mail addresses in `.prose` wrap (`overflow-wrap`), so content never widens a phone screen; `:focus-visible` is a 2px `ring` outline; `.prose` maps `--tw-prose-*` to tokens (links and counters `primary-strong`, bullets `primary`, quote border `secondary`).
+- **Emphasis**: headings mark one phrase with `*asterisks*`; `src/components/Emphasis.tsx` renders it as an italic `<em>` in `primary-strong` (`secondary` on dark).
+- **Buttons**: `src/components/ui/button.tsx` (shadcn); `src/components/CtaLink.tsx` maps CTA styles `primary` → default, `secondary` → outline, `link`, `ink`, `light`.
+- Breakpoints are Tailwind defaults; the header adds one arbitrary step at 1440px (`min-[1440px]:`, §4.2).
+
+### 4.2 Site shell and layout components
+`src/app/(site)/layout.tsx`: `<html lang="en-AU">` with the three font variables; body = `Tracking`, `AudienceProvider` (wraps the whole page), skip link to `#main`, `Header`, `<main id="main">`, `Footer`, sonner `Toaster`. Metadata base from `NEXT_PUBLIC_SITE_URL`, title template `%s | IHM`.
+
+- **Header** (`Header.tsx`, server; DEC-70): it takes no props; the site layout renders it on every page. Top to bottom:
+  - promo bar (ink, when `nav.promoBar.enabled`), in normal flow above everything; its text wraps;
+  - utility bar ≥lg (40px, ink): phone left in gold; `nav.utilityLinks` right, then the secondary CTA as a small outlined pill below 1440px;
+  - sticky bar, a fixed 72px tall (+1px border) at every width, so nothing shifts whether the promo bar is on or off: `SiteLogo`, `MainNav` ≥xl (centred in the space between logo and CTAs), secondary CTA ≥1440px, primary CTA ≥sm, `MobileNav` trigger <xl. Header CTAs are one-line `h-10` pills (`whitespace-nowrap`).
+
+  | Width | Sticky bar |
+  |---|---|
+  | <640 (sm) | logo mark only, hamburger |
+  | 640–1279 | logo mark + wordmark, primary CTA, hamburger; utility bar from 1024 (lg) |
+  | 1280–1439 (xl) | full menu (items `px-3`, 14px), primary CTA; the secondary CTA is in the utility bar |
+  | ≥1440 | full menu, both CTAs; from 1536 (2xl) items are `px-4`, 15px |
+
+  No width scrolls horizontally (`document.documentElement.scrollWidth <= innerWidth`), menu open or closed.
+- **MainNav** (client, ≥xl): Radix `navigation-menu` without a viewport; items without groups are plain links. An item with more than one group or more than 6 links opens a wide panel positioned against the header bar (centred, `max-w-[68rem]` inside the bar's padding): a title column (title, "View all" link, and the group marked `highlight` as gradient tiles — Courses: How to Apply, Find your perfect course) and the other groups in 2 CSS columns (`break-inside-avoid`; one group alone: 2 columns, 3 above 12 links). A group heading with an `href` is a link with an arrow (School of Nursing → the course finder filtered to the school, School of Social Work → /school-of-social-work/, DEC-36). The Courses groups follow the ihm.edu.au menu: School of Nursing, School of Social Work, Package Courses, Careers Advancement Programs (CAP). Smaller items open a compact 18rem panel under the trigger, opening leftwards for items in the right half of the menu. Every panel starts 6px below the bar and is capped at the viewport height left below the header (`--nav-panel-top`, measured on open), scrolling inside when taller. Radix gives arrow-key and Tab operation and closes on Escape and outside click. A menu item whose `href` is `#` is a heading only and shows no "View all" link.
+- **MobileNav** (client, <xl): `sheet` from the right (`min(92vw, 26rem)`, scrolls inside) with an `accordion` per menu item (group headings in `label-mono`, linked when they have an `href`; highlight groups as gradient tiles; long labels wrap), both CTAs, the phone and the utility links. Radix traps focus and closes on Esc.
+- **Footer** (server, async): the ihm.edu.au footer sections on `bg-ink-glow` — the Aboriginal design line on top (`footer.borderImage`), Acknowledgement of Country (gradient display heading, gold text), the brand column (logo, institute name, registration lines, Study Australia and E4E marks, social icons), Quick Links, Contact Us (`kind: 'contact'`: label above value with icons, the corporate profile as a pill), Campuses (`kind: 'campuses'`: pin buttons); 4 → 2 → 1 columns; the newsletter sign-up (`footer.newsletter`, button "Subscribe") as a compact card; the legal line with the year. A faint animated sun sits in the corner. It also mounts the site-wide `EnquiryDialog` and the `WhatsAppButton` (hidden while `site.whatsappNumber` is empty).
+- **SiteLogo**: the IHM Australia logo from `public/brand/` (`ihm-logo.svg`; `ihm-logo-on-dark.svg` with white “Powered by Arizona State University” text in the footer), 48px tall below sm and 56px from sm in the 72px bar. `public/brand/ihm-mark.svg` (the emblem) is the favicon (`src/app/(site)/icon.svg`) and the missing-image placeholder.
+- **PageBand** (`PageBand.tsx`): the title band for templates with their own h1 (course listing, blog/news, search): brand wash, emblem rays, eyebrow pill, coral-to-gold rule.
+- **MediaImage** fallback: when an upload's file is missing (a fresh database before `npm run import -- media`), the slot keeps its size and shows the brand wash with the emblem instead of a broken image.
+- **Section** (`Section.tsx`): top level (`depth` 0) = full-bleed `<section>` with tone classes (`default`, `card`, `muted`, `ink`, `sunrise` = `bg-brand-wash`); a hero block without its own tone gets the brand wash, the emblem rays and a coral-to-gold bottom rule, spacing (`default` py-14 / md:py-20, `compact` py-8 / md:py-12, `none`), `id` = `anchorId` with `scroll-mt-[88px]`, inner `max-w-site px-5 md:px-8`. Nested (`depth` > 0): a plain `<div>` (py-4, or py-0 for `none`), no background, no container.
+- **Container**: `mx-auto w-full px-5 md:px-8`, `max-w-site` or `max-w-4xl` (`narrow`).
+- **Prose** (`Prose.tsx`): Lexical JSON → React with `proseClassName` (`prose prose-lg max-w-prose-site`, display-font semibold headings via `prose-headings:*` utilities, `primary-strong` links); the component owns the prose typography and the theme's base layer sets only the `.prose` colour variables; h1 is demoted to h2; internal links resolve via `docHref` (`path`, else `/courses/<slug>/` or `/blog/<slug>/`); upload nodes render `MediaImage` for images, a link otherwise.
+- **MediaImage** (`src/components/blocks/MediaImage.tsx`): `next/image` with `unoptimized` for `/api/media/` sources (DEC-25); blocks pick Payload's generated sizes via `pickSize` (`src/lib/media-sizes.ts`).
+
+Server components by default. Client islands: `MainNav`, `MobileNav`, `AudienceProvider`, `AudienceSwitch`, `WhatsAppButton`, the block `*Client.tsx` parts (tabs, accordion, pathways, curriculum, gallery, team grid), `VideoPlayer`, `BrochureDialog`, `SlideCarousel` and `CardCarousel` (§4.6), the testimonial `QuoteText`, the enquiry form and dialog clients, `CourseResults.client.tsx`.
+
+### 4.3 Audience switch (`src/components/audience/`)
+- `AudienceProvider` (client, in the site layout): state `domestic` | `international` (default `domestic`), exposed as `data-audience` on a `group/aud` wrapper.
+- `AudienceSwitch` (client): BON segmented pill, `role="radiogroup"` with two `role="radio"` buttons and `aria-checked`. Rendered by the hero when `audienceSwitch` is true (CourseDetail sets it for `studentType: 'both'` courses).
+- `AudienceOnly` (server): wraps one audience's version; the inactive one is hidden by `group-data-[audience=…]/aud:hidden`. Audience-aware output (`admissionsPanel`, `startDates`, `CourseFacts`) puts both versions in the server HTML, so the page works without JS.
+
+### 4.4 Course key facts (`src/components/course/`)
+- `facts.ts` (pure: no React, no Payload): `FACT_KEYS` = duration, units, delivery, level, campuses, cricos, fee, with `FACT_LABELS`. `courseFactsFor(course, audience)` resolves each fact from `courses.facts.<key>` ({show, value, detail}); for the international audience of a `both` course, `factsInternational.<key>` wins when it has a value or `show: false`. A blank value falls back to the course's own fields (lookup names of `durations`, `deliveryModes`, `levels`, `campuses` joined with " · "; `units` → "N units"; `cricosCode`; `fees.displayAmount` with `fees.note` as detail). `show: false`, or no value after the fallback, drops the fact. `factListsFor`, `hasCourseFacts` and `audiencesOf` build on it.
+- `CourseFacts.tsx` (server): `<CourseFacts course audience? only? className? />` renders a `<dl>` strip (2 → 3 md → 4 lg columns; `label-mono` term, `display` value, muted detail). Without `audience`, a `both` course renders one strip per audience inside `AudienceOnly`, or a single strip when both audiences resolve to the same facts. It renders nothing when no fact resolves. It needs the course doc at depth ≥ 1 (lookup names). A developer can drop `<CourseFacts course={course} />` into any hand-written course page.
+- `CourseDetail` places it under the hero (full-width card band) unless a `courseFacts` block appears anywhere in the course's section layouts. The `courseFacts` block (`20-blocks.md`) is a thin wrapper around the same component.
+- `scripts/dev/fill-course-facts.ts [--dry] [--offline]` fills blank `facts.<key>.value/detail` from the course's fields and the live course page (never overwrites a value; sets `facts.cricos.show = false` on domestic-only courses); report in `scripts/dev/out/course-facts-report.json`. Migration: `src/migrations/20261020_071125_add_course_facts.ts`.
+
+### 4.5 Templates (`src/components/templates/`)
+Hardcoded route files (`src/app/(site)/**/page.tsx`) either compose the authoring kit (`src/components/page/`, `20-blocks.md`) directly, or render a data-driven page component from `pages.tsx` with `title`, `path`, `hero` (hero block fields) and their own JSX as `children`. Each page component loads its CMS data and hands it to a pure `*View` that renders without a database. The `template` label in `src/content/pages.ts` (about, policy, studentSupport, library, research, partnership, careers, utility, formPage, generic, …) classifies a page; labels with no page component below are plain kit compositions (hero + `Rich`, `Tabs`, `Accordion`, `Table`, `CardGrid`, `Cta`, …).
+
+| Component | Used by | Composition |
+|---|---|---|
+| `HomePage` / `HomeView` | `/` | Organization JSON-LD; hero (the page's own: one hero, or an array rendered as the hero carousel, §4.6; else a split fallback from `homeCopy.ts` with the first featured course's image); featured courses carousel (`courses.featured` by `featuredOrder`, else the first domestic courses); schools `cardGrid` with course counts; stats (the page's own, else live counts); campus photo strip; testimonials carousel; page children; latest 3 posts; CTA banner. |
+| `SchoolView` (view only; no page component in `pages.tsx`) | no route (DEC-36) | compact or split hero from the school lookup; children; the school's courses; school staff grid; CTA banner. |
+| `SswPage`, `SswCareerPage`, `SswEventPage` (`src/components/school-of-social-work/`) | `/school-of-social-work/**` (DEC-36) | The design of the School's own microsite in the site tokens: a warm-ink hero (breadcrumb, eyebrow, Fraunces title with the second sentence or `_marked_` words in gold italics, serif lead, buttons, chips; a photo card with coral and gold corner tiles and an optional tag/caption overlay; concentric ripples; the "country lines" across the foot) and BreadcrumbList JSON-LD; the School sub-navigation (`SchoolNav.client.tsx`, sticky under the header, active page underlined with the brand gradient) with the microsite's items and its "Study with us" menu (Bachelor of Social Work course page, Study with us, Life at School of Social Work, Student support): the menu opens on hover, click, Enter/Space or ArrowDown, arrow keys move through it, Escape, leaving it or a click outside closes it; the panel (gradient top rule, cream card) sits under its button outside the scrolling list, so it is not clipped on phones. Sections split at h2 with the all-caps line before each as eyebrow. A section's opening text sits beside its heading (heading left, text right; later text stays in the right column) or, when the section has a photo, under the heading beside the photo (centred for short text; top-aligned with a sticky photo for long text, so no column shows a hole); cards, tables and grids follow across the full width. A sub-heading after a full-width grid opens a new part of the section under a rule (Fielda after the placement partners, each resource category). The Fielda showcase on the Study page (`FieldaShowcase.client.tsx`) follows the microsite's script: seven tabs beside an app window, rotating every 6.5 s with a progress line under the window bar and the active tab, paused on hover, focus, hidden tab, reduced motion or "Pause rotation"; arrow keys, Home and End move between tabs; the audiences above it are columns under a coral rule and the "coming soon" line is italic with the words in gold. Grids never leave a lone card at the left: the last row is centred (cards, Fielda screens, conference streams), or the first card is featured across the row (careers, events: 3k+1 items), the first video takes 2×2 (5 videos in 4 columns), the governance tree and the team grid close their last row, link tables fill empty cells. Tables keep dark text on any band. The h2's `tone` paints the band — cream (default), `dark` (`bg-ink-glow` + ripples; the microsite's "teal"), `coral` (`bg-coral-band`; its "terracotta"), `sand` — `layout: 'split'` sets the title beside the text, `img` adds a photo beside the section text (offset gradient tile; `natural` shows charts uncropped), `band` makes a half-photo / half-ink band. Cards carry the offset "paper" shadow (`10px 10px 0 sand`); on dark bands the numbered cards are coral. Careers are photo cards (`CAREER_PHOTO`), events show a three-photo mosaic, statement "pillars" pair a dark and a coral-topped card, partner links are a numbered grid, leaders get portrait cards and the team compact rows. The conference page has its own layout (`ConferenceLayout`): poster hero, coral facts strip (dates, venues, registration and enquiries), sticky in-page navigation, numbered sections, program day tabs and a stream filter (`Conference.client.tsx`), key dates as a ruled list, About and Call for abstracts beside a sand card, EducationEvent JSON-LD, and the microsite's "before you begin" notice (a dialog 1.5 s after load, once per session, linking to the guidance PDF). A career page: photo hero, work cards, pathway on ink, three related areas with photos. An event page: story beside a photo, the full gallery on ink as an even photo grid (wide cells close the last row), three more events. |
+| `CampusPage` / `CampusView` | none (kept for reuse; the campus pages use `CampusDetail`, below) | hero (full-image from the campus lookup when the page has none); visit/contact cards; children; courses at the campus; `enquiryForm` (`#quickContact`). |
+| `CampusListingPage` | none (kept for reuse; `/campuses/` is bespoke) | hero; one card per campus lookup row linking to its page; children. |
+| `ContactPage` / `ContactView` | none (kept for reuse; `/contact/` and `/talk-to-rishi/` are bespoke) | hero; children; campus link cards; `enquiryForm` unless `ownForm`. |
+| `CalendarPage` / `CalendarView` | no route (the two calendars use `CalendarShell`, below) | hero; children; `intakeCalendar` (12 months), or `PortalNotice` when the portal has no dates. |
+| `CalendarShell` (`src/components/calendar/`) | `/course-calendar/`, `/monthly-calendar/` | ink hero with an All / Domestic / International switch (`?stud_type=`); `MonthCalendar.client` (12 months from the portal: month strip, course filter as legend, month grid ≥md or list, every intake also in the server HTML); `PortalNotice` when unavailable; `quick-enquiry` at `#quickContact`; CourseInstance ItemList JSON-LD. |
+| `EventsPage` / `EventsListingView` | events pages | hero; children; upcoming `events`; `event-registration` form unless `ownForm`; latest news cards. |
+| `StaffDirectoryPage` | `/staff-profile/` | hero; children; staff grouped by school, linking to profiles. |
+| `StaffProfile` | `[...slug]` catch-all (staff paths) | portrait/name column + bio (2 columns ≥lg); publication/research entry cards. No email or phone. |
+| `MicroCredentialPage` / `MicroCredentialsHubPage` | micro-credential pages | hero; children; for a matching course, `courseFacts` + `censusDates` blocks, else an empty notice; the hub adds a card per child page; CTA banner. |
+| `LandingSectionPage` / `LandingView` | course-marketing pages at normal URLs | hero; children; up to 6 courses whose title matches; CTA banner. |
+| `AlumniHubPage` / `AlumniHubView` | no route (`/alumni/` is its own route file over `src/content/alumni.ts`) | hero; children (or two intro cards when empty); `alumni-story` and `alumni-signup` forms unless the page has its own. |
+| `LibraryShell` (`src/components/library/`) | `/library/` and its six children | ink hero with the Primo catalogue search (`LibrarySearch.client`, GET to library.hci.edu.au), library sub-navigation, the page, and the "Request Library Resource" / academic support band. `UnitReadings.client` renders a course's units and readings on `/library/eresources/?course=<id>`. |
+| `PartnerShell` / `ResearchShell` (`src/components/research/`) | the four partnership pages; the five research pages | `SupportShell` with the partnership or research sub-navigation; the partnership pages close with the admissions band, the research pages with `ResearchBand` (research ethics mailbox, collaboration link). `PartnerCards` links the Cintana, ASU and Ramsay pages; `PersonCard` shows a portrait or initials until the live-only photo is downloaded; `Feature` is text beside a photo. |
+| `CampusDetail`, `CampusHero` (`src/components/campus/`) | the four campus pages; `CampusHero` also on `/campuses/` and `/contact/` | full-bleed photo hero with the campus sub-navigation; highlights strip; the city copy beside a sticky photo mosaic; campus video (`VideoGallery`) or the Matterport 3D tour; campus team (`PersonCard`, no personal mailboxes); `MapCard` per location (Google map, phone, directions link); Perth public transport; courses taught at the campus (`courses.campuses`); `StudentLife`; `EnquireSection` (quick-enquiry at `#quickContact`). Copy in `src/content/campus-pages.ts`. |
+| `LegalShell`, `PolicyDoc`, `ThankYou`, `ComplaintForm`, `SiteMapBrowser.client` (`src/components/legal/`) | the privacy pages, /site-map/, /ihm-student-complaints/, /ihm-student-appeals/; /thanks/ and /thanks-events/ (/google-review-design/ is now a 301 to /student-testimonials/) | `LegalShell` = `SupportShell` with the policies sub-navigation and the admissions band. `PolicyDoc` = sticky contents list + anchored chapters (kit blocks) + optional tables after. `ThankYou` = success hero (phone, email) + three next steps; the thank-you, payment and error pages are `noindex`. `ComplaintForm` embeds the Spot-nik complaint/appeal forms. /site-map/ is built from `nav.ts`, the CMS courses, `footer.ts` and `pages.ts` (noindex and thank-you/error pages left out) with a client-side filter. |
+| `VideoGallery` / `VideoDialog` (`src/components/media/VideoGallery.client.tsx`) | `/library/`, `/library/referencing/`, `/alumni/`, `/school-of-social-work/life/` | YouTube poster cards and one modal player; the `youtube-nocookie` iframe is created only when a video is opened. `feature` makes the first card 2 columns × 2 rows. |
+| `CourseDetail` | `/courses/<slug>/` | below. |
+| `CourseListingView` | `/courses/` | optional facet tab row; filter rail ≥lg (sticky), collapsible `<details>` below; URL-param facets on the server; `CourseResults.client.tsx` adds text narrowing, a grid/detail toggle and an `aria-live` count. |
+| `BlogRoute` → `BlogListing` / `BlogPost` | `/blog/…`, `/news/…` | listing: cards, 12 per page, numbered pagination; post: header with date, the hero image (the CMS `heroImage`, else a topic photo from `src/content/post-images.ts`; the listing cards use the same fallback), `Prose`, `blog-enquiry` form in a sticky sidebar ≥lg; `ArticleJsonLd`: BlogPosting (blog) or NewsArticle (news) with headline, dates, author, hero image, publisher Organization (`#organization`, logo `/brand/ihm-logo.svg` unless the CMS sets one), `articleSection`, `inLanguage` en-AU, `isPartOf` the WebSite node, plus BreadcrumbList. |
+| `SearchView` | `/search/` | results grouped by type. |
+| `PaymentOptionsView`, `PayOnlineView`, `ReceiptView` | `/payment-options/`, `/makepayment/`, `/pay/receipt/<uuid>/` | gateway cards; the pay form; receipt `dl` (`45-payments.md`). |
+| `landing/*` | `/lp/<slug>/` | landing page components (`60-landing.md`). |
+
+`pageParts.tsx` holds the shared pieces: `LeadHero`/`leadHero` (page hero merged with template defaults), `EmptyNotice`, `Banner` (cta banner), `SectionTitle`, `enquireHref`.
+
+**CourseDetail** (`CourseDetail.tsx`, rendered by `src/app/(site)/courses/[slug]/page.tsx` with the course, `courseShared.layout` and the other-audience sibling course), top to bottom:
+1. hero (`bg-brand-wash`, animated sun): breadcrumb (Home › Courses › school, linked to the filtered finder), school eyebrow, the title with its last word (and a trailing bracket group) as the coral italic accent, excerpt, Apply (when `applyLink`), Enquire (`#quickContact`) and "Explore the course"; the `AudienceSwitch` for `both` courses and the Domestic / International sibling pills; on the right the course photo (`heroImage`, else `courseImage(slug)` from `src/content/course-images.ts`: the specialisation's micro-credential photo, else a photo per course family) with a school badge;
+2. key facts as cards (`CourseFacts variant="cards"`, auto-fit columns) inside the hero, unless a section layout holds a `courseFacts` block;
+3. sticky numbered section bar ≥lg when the course has more than one section;
+4. a two-column body ≥lg: `courses.sections` in the order pathways → overview → placements → structure → entry → fees → careers → faq → additional, each with a numbered gradient badge, eyebrow and title (`#section-<slot>`), layout rendered at depth 1; slots without blocks are omitted; two or more consecutive `videoEmbed` blocks render as one `testimonials` carousel (`groupVideoRuns`, `20-blocks.md`); after the fees slot `feesTable`, `startDates` (only when `showStartDates`, DEC-7) and `censusDates`, each only when the sections do not already hold one; beside it a sticky ink "At a glance" card (`CourseFacts variant="compact"`, Apply, Enquire, the advisor phone) and the `brochureDownload` button when the course has a brochure;
+5. `courseManagers` and `relatedCourses` (limit 6), each unless already placed; then `courseShared.layout` (DEC-22);
+6. `quick-enquiry` form (`#quickContact`, muted) and an ink CTA banner;
+7. fixed bottom Apply/Enquire bar <lg; Course JSON-LD.
+
+Bachelor of Nursing (`/courses/bachelor-of-nursing/`) and GCAN – Australian Nursing Practice have bespoke route files; the 12-specialisation GCAN hub and the Master of Nursing (Online) Specialisation Pathway are content pages.
+
+### 4.5a Page kit for long-form pages (`src/components/page-kit/Kit.tsx`)
+Text-heavy pages migrated from WordPress keep their copy as typed `KitBlock[]` in `src/content/*.ts`: headings, paragraphs,
+lists, tables, YouTube ids, images, button rows and stat tiles (`stats`), as plain strings with `**bold**` and `[label](href)` markers (no HTML).
+`KitBlocks` renders them as JSX (link-only lists become buttons, consecutive videos a `VideoGallery`); `sections()` splits blocks
+at a heading level; `KitFaq` + `kitFaqJsonLd` give an accordion with FAQPage JSON-LD. `KitChapters` (admissions parts) lays out
+long content as numbered sections with a sticky heading column, turning h5 sub-sections into cards. `FormSplit` is the ink hero
+with a form or embedded application on the right (course enquiry, direct enrolment, diagnostic test). `LoginHub`
+(`src/components/hub/`) is the tile screen of /student-login/ and /staff-login/.
+
+### 4.5b Adjunct application wizard (`src/components/forms/AdjunctApplicationForm.client.tsx`)
+`/adjunct-appointments/#application-form`, form `adjunct-application`. Three steps as on the live page (applicant details; proposed
+appointment and eligibility with the CV picker; declarations with a collapsible review and Edit links), a progress bar and step
+buttons (a step opens only after the ones before it validate). The same zod schema as the server (the file field excepted); the CV
+is checked in the browser (PDF/DOC/DOCX, 10MB), uploaded to `/api/enquire/upload/` on submit, and its reference is sent with the
+enquiry; a retry reuses the stored file. Success replaces the wizard with a confirmation and the enquiry reference. Enter in steps
+1–2 moves to the next step. Beside it, sticky on lg: the ink "Ready to apply?" card and the checklist of what to have ready.
+
+### 4.6 Carousels
+- **Primitive**: `src/components/ui/carousel.tsx` (shadcn, embla). `Carousel` is a `role="region"` with `aria-roledescription="carousel"`; `CarouselItem` is a `role="group"` slide. ArrowLeft / ArrowRight move it, drag and swipe come from embla, and embla scrolls a slide into view when focus enters it. Under `prefers-reduced-motion: reduce` (`useReducedMotion`) the buttons, dots and keys jump instead of animating. The context (`useCarousel`) exposes `selectedIndex`, `snapCount`, `scrollTo` and `reducedMotion`; `CarouselDots` (one button per snap point, `aria-current` on the selected one, the selected dot a wider `primary-strong` pill, `secondary` on ink) and `CarouselCounter` (`label-mono` "02 / 12") read them.
+- **`SlideCarousel`** (`src/components/blocks/SlideCarousel.tsx`, client): the site carousel. Props: `label` (region name), `perView` 1 / 2 / 3 / 4 (1 = always one; 3 = 1 → 2 md → 3 lg; 4 = 1 → 2 md → 4 lg), `indicator` (`dots`, or `counter`; default dots up to 8 slides, counter above), `autoplay` (ms; off by default), `loop`, `onDark`, `className`, `slideClassName`. Server components pass the slides as children, so every slide is in the server HTML. Each slide is labelled "n of N"; an `sr-only` polite live region announces "Slide n of N" after a move. Controls sit under the slides: round outline prev / next buttons (40px), then the indicator; when every slide is already in view the row turns invisible and keeps its height. Autoplay never runs under reduced motion, stops while the pointer is over the carousel or focus is inside it and while the tab is hidden, shows a Pause / Play button at the end of the controls row, and silences the live region while it runs.
+- **`CardCarousel`** (`src/components/blocks/CardCarousel.tsx`): `SlideCarousel` with `perView` 3 (or 2 / 4) and no autoplay, for card rows: featured courses, `relatedCourses`, `cardGrid` carousel variant, `testimonials`.
+- **Hero carousel** (`src/blocks/hero/HeroCarousel.tsx`, server): several hero slides in one `Section`, one per view, looping, autoplay every 8 s (`HERO_AUTOPLAY_MS`) with the rules above. Each slide is `HeroContent` (the split / compact hero without its section; a `full` slide renders as split). Slide one holds the page h1, the `animate-rise` text and the preloaded image; later slides use h2 and lazy images. A single slide renders the plain `hero` block. `HomeView` uses it when the page passes an array as `hero`; the home route keeps the slides as code (DEC-61).
+
+## 5. URLs
+Serves no routes of its own.
+
+## 6. Integrations
+Google Fonts is contacted only at build (`next/font`). Env: `NEXT_PUBLIC_SITE_URL` (metadata base).
+
+## 7. Import / seed
+None for tokens and templates. Course key facts: `scripts/dev/fill-course-facts.ts` (§4.4).
+
+## 8. Acceptance checks
+1. `find src \( -name '*.css' -o -name '*.scss' -o -name '*.module.*' \)` prints only `src/styles/theme.css` and the empty `src/app/(payload)/custom.scss`.
+2. `grep -rEil 'bootstrap|jquery|owl\.carousel|bonq7-' src package.json` prints nothing.
+3. On a running server, `curl -s http://localhost:3000/ | grep -c 'fonts.googleapis.com'` prints 0 (font files come from `/_next/static/media/`).
+4. `npm run test:int` runs `tests/courses/course-facts.test.ts` (fallbacks, `show` switch, international override, the `<dl>` markup, one strip per audience behind the switch, the block wrapper honouring `show` and `ctx.audience`) and `tests/courses/blocks.test.ts` (courseFacts, feesTable, startDates, censusDates).
+5. `npm run test:blocks` runs `tests/templates/templates.test.tsx` (Home, School, Campus, Calendar, Contact, Landing, Alumni hub, Staff directory, Micro-credential and Events views render without a database; one h1; empty sections omitted), `tests/templates/listing.test.tsx` and `tests/templates/search.test.tsx`; `tests/blocks/carousel.test.tsx` covers §4.6 (carousel default and markup, video cards, long-quote toggle, `groupVideoRuns`, pause control and reduced motion, one h1 in the hero carousel).
+6. With a dev server up, `HEADER_BASE_URL=<url> npx playwright test --config=tests/header/playwright.config.ts` passes `tests/header/header.e2e.spec.ts`: no horizontal scroll and a 73px sticky bar at 390, 1024, 1180, 1280, 1366, 1440 and 1920; every top-level item visible on one row between logo and CTAs from 1280; the hamburger below; each mega panel inside the viewport, reachable by Tab and closed by Escape; a tall panel scrolls inside a short viewport; outside click closes; the 390 sheet holds every item, both CTAs, the phone and the utility links.
+
+## 9. IHNA differences
+IHNA uses the same files and changes only the colour values in `theme.css` and the logo in `src/content/site.ts`. IHNA work is paused.
+
+## 10. Open questions
+None.
+
+
+### Sun emblem motion
+`HeroRays` (the IHM sun, `src/blocks/hero/Component.tsx`) rotates its rays once every 120 s and lets the core breathe (7 s) through `.sun-rays` / `.sun-core` in `theme.css`; both stop under `prefers-reduced-motion`. Every hero, band, CTA and footer that shows the sun picks this up.

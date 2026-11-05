@@ -1,0 +1,70 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+
+/.idea/*
+!/.idea/runConfigurations
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env*.local
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+.env
+
+/media
+# WordPress content exported by `npm run inventory:wp` (read by `npm run import`)
+/.data/
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+# Static document stores copied by `npm run import -- static` (307 MB); regenerated from ../ihmv3, tracked by the manifest in scripts/import/out/
+/public/IHM_Domestic_SHB/
+/public/International-SHB/
+/public/brochures/
+/public/pdf/
+
+# generated reports from scripts/dev/*
+/scripts/dev/out/
+
+# local reports, screenshots and import caches (not deployed; see docs/DEPLOYMENT.md)
+/scripts/import/out/
+/scripts/parity/out/
+/Claude outputs/
+/handover/
+# production / staging env files hold secrets: never commit them (docs/DEPLOYMENT.md §3)
+.env.production
+.env.staging
