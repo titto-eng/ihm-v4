@@ -1,5 +1,7 @@
 # Isolated Replit test copy
 
+For laptop development and GitHub checks, follow [LOCAL-DEVELOPMENT.md](LOCAL-DEVELOPMENT.md).
+
 This is the supplied full Next.js/Payload source, not a new frontend. AWS, the live database,
 DNS and ihm.edu.au are not deployment targets here.
 

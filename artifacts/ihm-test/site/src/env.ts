@@ -3,6 +3,7 @@ import { z } from 'zod'
 // Validated once at boot. A missing required value stops the app (DEC-14, 90-security §7).
 const schema = z.object({
   REPLIT_TEST_SITE: z.enum(['0', '1']).optional(),
+  LOCAL_DEV: z.enum(['0', '1']).optional(), // laptop-only file storage; Replit launcher forces 0
   DEFAULT_OBJECT_STORAGE_BUCKET_ID: z.string().optional(),
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   NEXT_PUBLIC_SITE_URL: z.string().url().default('http://localhost:3000'),

@@ -1,0 +1,58 @@
+name: IHM checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ihm-checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  site:
+    name: Site checks and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: artifacts/ihm-test/site
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ihm_local
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d ihm_local"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: artifacts/ihm-test/site/package-lock.json
+      - name: Install the isolated site's locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Generate disposable local credentials
+        run: npm run local:init
+      - name: Initialize only the ephemeral CI database
+        run: npm run local:schema
+      - name: Security, local safety, types, lint and block registry
+        run: npm run local:check
+      - name: Generated Payload types are committed
+        run: git diff --exit-code -- src/payload-types.ts
+      - name: Production compilation against an empty fixture database
+        run: npm run local:build
+      # No deployment secrets, content dumps, shared App Storage, or publish action.
+      # Full integration tests require the separate MySQL/Mailpit fixtures.

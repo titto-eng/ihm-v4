@@ -2,6 +2,9 @@ import { Storage } from '@google-cloud/storage'
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 import type { Adapter } from '@payloadcms/plugin-cloud-storage/types'
 import { Readable } from 'node:stream'
+import { localFiles } from './storage/localFiles'
+
+const local = localFiles()
 
 const storage = new Storage({
   credentials: {
@@ -19,6 +22,7 @@ function object(collection: string, filename: string) {
   return storage.bucket(bucket).file(`ihm-test/uploads/${collection}/${filename}`)
 }
 export async function storedFile(collection: string, filename: string, head = false) {
+  if (process.env.LOCAL_DEV === '1') return local.serve(collection, filename, head)
   const file = object(collection, filename)
   try {
     const [meta] = await file.getMetadata()
@@ -35,12 +39,16 @@ export async function storedFile(collection: string, filename: string, head = fa
     throw error
   }
 }
-const adapter: Adapter = ({ collection }) => ({
+export const testStorageAdapter: Adapter = ({ collection }) => ({
   name: 'replit-app-storage',
   handleUpload: async ({ file, storageFilePath }) => {
+    if (process.env.LOCAL_DEV === '1') return local.save(collection.slug, storageFilePath, file.buffer, file.mimeType)
     await object(collection.slug, storageFilePath).save(file.buffer, { resumable: false, contentType: file.mimeType })
   },
-  handleDelete: async ({ storageFilePath }) => { await object(collection.slug, storageFilePath).delete({ ignoreNotFound: true }) },
+  handleDelete: async ({ storageFilePath }) => {
+    if (process.env.LOCAL_DEV === '1') return local.delete(collection.slug, storageFilePath)
+    await object(collection.slug, storageFilePath).delete({ ignoreNotFound: true })
+  },
   staticHandler: async (req, { params, doc }) => {
     if (collection.slug === 'application-files' && (req.user?.collection !== 'users' || !req.user.roles?.includes('admin'))) {
       return new Response('Forbidden', { status: 403, headers: { 'Cache-Control': 'private, no-store' } })
@@ -53,8 +61,8 @@ const adapter: Adapter = ({ collection }) => ({
 })
 export const replitStorage = cloudStoragePlugin({
   collections: {
-    media: { adapter },
-    documents: { adapter },
-    'application-files': { adapter },
+    media: { adapter: testStorageAdapter },
+    documents: { adapter: testStorageAdapter },
+    'application-files': { adapter: testStorageAdapter },
   },
 })

@@ -3,6 +3,7 @@ import { spawn } from 'node:child_process'
 const mode = process.argv[2] || 'start'
 if (!process.env.ADMIN_BASIC_PASSWORD) throw new Error('Admin gate secret required')
 Object.assign(process.env, {
+  LOCAL_DEV: '0',
   ADMIN_BASIC_HASH: createHash('sha256').update(process.env.ADMIN_BASIC_PASSWORD).digest('hex'),
   ADMIN_BASIC_USER: 'ihm-test', REPLIT_TEST_SITE: '1', DRY_RUN: '1', PAYMENTS_DRY_RUN: '1',
   PAYMENTS_ALLOW_PRODUCTION: '0', TRACKING_ENABLED: '0', NEXT_PUBLIC_ROBOTS: 'noindex',

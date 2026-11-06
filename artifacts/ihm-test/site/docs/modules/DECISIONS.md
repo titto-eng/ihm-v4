@@ -84,6 +84,7 @@ file disagree, fix the doc. Each row: decision as it stands | why.
 | DEC-66 | `src/migrations/20261019_101350_cut_pages_to_code.ts` is the baseline for a fresh database; later migrations add to it (`20261020_071125_add_course_facts`, `20261020_071535_add_documents`). Dev uses push mode. | Production applies migrations only. |
 | DEC-44 | Payload jobs tables (`payload_jobs`, `payload_jobs_log`, `payload_jobs_stats`) are part of the baseline migration. | Scheduled jobs need them in production. |
 | **Dev environment** | | |
+| DEC-73 | Laptop commands use a loopback-only `ihm_local` database, private generated secrets and local files behind the same Payload upload access controls. Normal dev/build never pushes schema; `local:schema` is explicit. Replit forces cloud storage. GitHub checks use disposable data and never publish. | Local development must not edit hosted records, leak private uploads, or enable live integrations. |
 | DEC-27 | Dev Postgres: Docker maps it to host port 5433; a Homebrew Postgres on 5432 also works; `DATABASE_URL` decides. | Avoids the port clash. |
 | DEC-28 | Tests: `npm run test:int` (vitest, node), `npm run test:blocks` (vitest, happy-dom), `npm run check` runs both plus types, lint and block checks. | jsdom 28 does not load on Node 22.11. |
 | DEC-37 | Migration progress lives in `../inventory/v2/ihm/TRACKING.csv` (and the `Tracking` sheet of `IHM-inventory.xlsx`), built from `pages.csv` and `landing-pages.csv` by `npm run status-sheet` (which runs `npm run tracking-sheet`), never in memory notes. | One tracked source. |

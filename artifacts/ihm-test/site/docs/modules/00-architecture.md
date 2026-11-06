@@ -104,6 +104,15 @@ otherwise SMTP (`SMTP_HOST`/`SMTP_PORT`, default `localhost:1025` = Mailpit) (`s
 on 5432 works too, `DATABASE_URL` decides, DEC-27); `portal-mysql` (`mysql:8`, host port 3307, db `ihmedu_portal`; load the
 fixtures with `docker/portal-fixtures/load.sh`); `mailpit` (SMTP 1025, UI 8025).
 
+**Isolated laptop workflow (DEC-73).** `docs/LOCAL-DEVELOPMENT.md` documents the `local:*`
+commands. `.env.localdev` supplies fresh private settings; the launcher accepts only
+loopback PostgreSQL databases named `ihm_local` or `ihm_local_<suffix>`. It forces the
+test protections and disables schema push except for explicit `local:schema`.
+`LOCAL_DEV=1` switches the existing upload adapter to `.local-data/` without changing
+Payload access controls or upload object-key fields. The Replit launcher forces
+`LOCAL_DEV=0`. GitHub checks use a fresh disposable PostgreSQL database, not hosted data,
+and do not publish. Full fixture-dependent integration checks remain a separate suite.
+
 **Schema.** `postgresAdapter` with `blocksAsJSON: true`. Dev pushes the schema from the running dev server only; scripts run with
 `DISABLE_DB_PUSH=1` (DEC-46). Production applies `src/migrations/` with `npm run payload migrate`:
 `20261019_101350_cut_pages_to_code` (baseline), `20261020_071125_add_course_facts`, `20261020_071535_add_documents`. Every schema

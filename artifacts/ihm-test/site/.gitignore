@@ -41,6 +41,8 @@ next-env.d.ts
 .env
 
 /media
+/.local-data/
+.env.localdev
 # WordPress content exported by `npm run inventory:wp` (read by `npm run import`)
 /.data/
 

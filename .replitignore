@@ -9,3 +9,5 @@
 **/scripts/parity/out/
 **/*.dump
 **/*.dump.sql
+**/.local-data/
+**/.env.localdev
