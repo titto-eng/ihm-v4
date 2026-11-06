@@ -38,3 +38,6 @@ PORTAL_ENABLED = "0"
 RATE_LIMIT_STORE = "memory"
 REPLIT_TEST_SITE = "1"
 TRACKING_ENABLED = "0"
+
+[userenv.production]
+NEXT_PUBLIC_SITE_URL = "https://ihm-website-test-deployment.replit.app"
