@@ -254,6 +254,30 @@ Payload's default access is "any logged-in user", which includes alumni, so ever
 ## 9. IHNA differences
 IHNA is not built. When it is, rotate the IHNA credentials that were in the old repos (Dynamics, HubSpot, Airwallex) and keep committed CVs out of the import.
 
+## Dependency maintenance
+
+The imported site remains npm-isolated; the surrounding workspace uses pnpm.
+Audit both dependency trees with `npm audit` in this directory and `pnpm audit`
+at the workspace root. Both lockfiles must be committed.
+
+The npm overrides enforce patched transitive dependencies where the latest
+parent still pins an affected release: Happy DOM, Nodemailer, Undici, fast-uri,
+the v6 selector parser, and the v10 minimatch branch. The deprecated esbuild-kit
+loader is replaced with its maintained successor, tsx, to remove esbuild 0.18.
+
+`deepmerge` has no upstream patched release for GHSA-gcqx-w48m-w2h4. Its override
+uses the MIT-licensed API-compatible security fork in `vendor/deepmerge-safe`,
+which defines own data properties for **both** target-copy and source-merge
+writes instead of invoking inherited setters. Do not downgrade to an old branch
+to escape an advisory's version range. Replace the fork only after an upstream
+fix is available and verified. `npm run test:security` checks prototype poisoning,
+ordinary merge compatibility, and Payload's actual resolution of the fork; it
+also runs as part of `npm run check`.
+
+Nodemailer uses its maintained v10 API; SMTP and stream transports retain the
+existing test/live safety controls. Happy DOM disables external resource loading
+by default; tests must not re-enable it to make iframe fixtures load.
+
 ## 10. Open questions
 1. Who rotates each credential in §7, and by when?
 2. Is the origin reachable only through Cloudflare Access? `ADMIN_GUARD_TRUST_CF_ACCESS=1` is safe only if it is.

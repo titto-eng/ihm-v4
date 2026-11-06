@@ -76,6 +76,7 @@ file disagree, fix the doc. Each row: decision as it stands | why.
 | DEC-59 | `/wp-content/uploads/<path>` looks up `media.legacyPath` and 301s to `/api/media/file/<filename>` (WordPress size variants fall back to the original); otherwise 404. | Old image links keep working. |
 | DEC-64 | Exact redirects are `src/content/redirects.ts`, loaded by `next.config.ts`; prefix and substring rules are `src/lib/legacy-redirects.ts`, run by the proxy. A published course or post cannot change its URL (`refuseUrlChange`); add the redirect first, then save with `context.allowUrlChange`. | Rule 1. |
 | **Security** | | |
+| DEC-72 | Audit the npm-isolated site and pnpm workspace separately. Use patched packages; where no published deepmerge fix exists, retain the documented API-compatible security fork with own-property writes and regression tests. | Avoid prototype poisoning without downgrading to an older, potentially unsafe branch or changing Payload's merge API. |
 | DEC-14 | GraphQL is disabled; `PAYLOAD_SECRET` (≥ 32 chars) and a postgres `DATABASE_URL` are required at boot (`src/env.ts`); scripts use npm. | Smaller attack surface; fail fast. |
 | DEC-21 | CSP is built in `src/proxy.ts` from code (`src/lib/seo/csp.ts`): `frame-src` from `site.allowedEmbedHosts` plus the fixed list; no DB lookup. | The proxy cannot query the DB. |
 | DEC-24 | `src/env.ts` is the master list of env names; `.env.example` mirrors it. | One list. |

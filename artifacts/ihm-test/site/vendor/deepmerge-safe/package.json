@@ -1,0 +1,12 @@
+{
+  "name": "@ihm/deepmerge-safe",
+  "version": "1.0.0",
+  "private": true,
+  "description": "API-compatible deepmerge 4.3.1 security fork for GHSA-gcqx-w48m-w2h4",
+  "main": "index.cjs",
+  "types": "index.d.ts",
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test test.cjs"
+  }
+}
