@@ -3,6 +3,7 @@ const commands = [
   ['node_modules/payload/bin.js', 'generate:types'],
   ['--test', 'vendor/deepmerge-safe/test.cjs'],
   ['--import', 'tsx', '--test', 'tests/local/local.test.ts'],
+  ['--test', 'tests/local/content-kit.test.mjs'],
   ['node_modules/typescript/bin/tsc', '--noEmit'],
   ['node_modules/eslint/bin/eslint.js', '.'],
   ['--import', 'tsx', 'scripts/check-blocks.ts'],

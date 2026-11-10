@@ -61,8 +61,11 @@ files can contain executable SQL. For a reset, create a **new** local database n
 update `.env.localdev`; do not run a reset against a hosted connection.
 
 The original handover is a point-in-time content copy. Later CMS changes made on the
-published test site are not automatically pulled into it. Obtain a separately reviewed,
-sanitized content/asset export when a newer copy is needed.
+published test site are not automatically pulled into it. Use the
+[reviewed public-content refresh workflow](CONTENT-KIT.md) for a newer copy.
+It requires source confirmation and explicit content/file approval, excludes private
+records, and imports only into a new empty local database using `npm run local:kit`.
+Do not run `local:schema` before a content-kit import.
 
 ## 3. Run and edit
 

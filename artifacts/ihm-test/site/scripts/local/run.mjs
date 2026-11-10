@@ -7,6 +7,7 @@ const commands = {
   build: ['--max-old-space-size=8000', 'node_modules/next/dist/bin/next', 'build'],
   schema: ['--import', 'tsx', 'scripts/local/schema.ts'],
   restore: ['--import', 'tsx', 'scripts/local/restore.ts', ...process.argv.slice(3)],
+  kit: ['scripts/content-kit/import.mjs', ...process.argv.slice(3)],
   check: ['scripts/local/check.mjs'],
   types: ['node_modules/payload/bin.js', 'generate:types'],
   migration: ['node_modules/payload/bin.js', 'migrate:create', ...process.argv.slice(3)],

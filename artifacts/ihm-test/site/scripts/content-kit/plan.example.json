@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "source": {
+    "environment": "replit-published-test",
+    "host": "CONFIRM-SOURCE-HOST",
+    "port": 5432,
+    "database": "CONFIRM-SOURCE-DATABASE",
+    "bucket": "CONFIRM-SOURCE-BUCKET"
+  },
+  "review": {
+    "approved": false,
+    "reference": "Replace with the approval record, not a person's private details"
+  },
+  "ids": {
+    "media": [],
+    "documents": [],
+    "courses": [],
+    "posts": [],
+    "events": [],
+    "testimonials": [],
+    "staff": [],
+    "categories": [],
+    "disciplines": [],
+    "levels": [],
+    "campuses": [],
+    "delivery_modes": [],
+    "durations": [],
+    "universities": []
+  },
+  "requiredFiles": {}
+}
