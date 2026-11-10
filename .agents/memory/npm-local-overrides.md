@@ -13,3 +13,14 @@ would resolve a nonexistent nested path.
 
 **How to apply:** Inspect the lockfile's local link target and run clean `npm ci`
 followed by actual consumer-resolution and regression tests before delivery.
+
+Keep committed npm tarball URLs portable rather than tied to the Replit-only
+registry hostname.
+
+**Why:** A successful workspace install can still leave internal download URLs
+in the lockfile, causing laptop installs to fail with DNS ENOTFOUND. Changing
+the laptop registry setting alone does not remove explicit locked URLs.
+
+**How to apply:** Normalize only registry URL prefixes after dependency updates;
+preserve versions, integrity hashes and local-fork links. Keep the workspace's
+configured security registry active when installing.

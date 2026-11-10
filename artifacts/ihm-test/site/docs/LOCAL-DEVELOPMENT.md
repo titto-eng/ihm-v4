@@ -34,6 +34,21 @@ names. Never paste the Replit production database connection here.
 
 ## 2. Choose an empty sandbox or the full content copy
 
+### Installation troubleshooting
+
+If `npm ci` reports `ENOTFOUND package-firewall.replit.internal`, the lockfile has
+environment-specific download URLs. Pull the corrected lockfile, or run
+`node scripts/local/portable-lock.mjs` before retrying `npm ci`. This preserves
+versions and integrity hashes; do not delete the lockfile or disable TLS checks.
+After dependency updates in Replit, run that normalizer before committing.
+CI checks that these internal download URLs are absent.
+
+On Windows, `EPERM` cleanup warnings can mean a process is holding files in
+`node_modules`. Stop this project's dev server and close editors using that
+directory. If cleanup still fails, restart Windows, delete only this site's
+`node_modules` directory, and retry `npm ci`. Keep `.env.localdev`, local uploads,
+and the lockfile.
+
 **Empty sandbox / CI:** run `npm run local:schema`. This builds the Payload schema but
 does not invent course/news content or supply photographs. It is enough for code checks;
 it is not a full-content preview.
