@@ -30,6 +30,7 @@
     "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" playwright test --config=playwright.config.ts",
     "db:fixtures": "node scripts/dev/load-portal-fixtures.mjs",
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts",
+    "test:integration:ci": "node scripts/ci/integration.mjs",
     "typecheck": "tsc --noEmit",
     "import": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/import/cli.ts",
     "assets:legacy": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/dev/fetch-legacy-assets.ts",

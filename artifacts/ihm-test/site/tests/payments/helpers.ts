@@ -83,7 +83,9 @@ export function airwallexSigned(body: unknown, opts: { secret?: string; timestam
 
 export const mailpit = 'http://localhost:8025/api/v1'
 export async function mailpitUp(): Promise<boolean> {
-  try { return (await fetch(`${mailpit}/info`, { signal: AbortSignal.timeout(2000) })).ok } catch { return false }
+  const res = await fetch(`${mailpit}/info`, { signal: AbortSignal.timeout(2000) })
+  if (!res.ok) throw new Error(`Mailpit is required for payment receipt assertions (HTTP ${res.status})`)
+  return true
 }
 export async function mailpitFind(query: string): Promise<{ Subject: string; To: { Address: string }[] }[]> {
   const res = await fetch(`${mailpit}/search?query=${encodeURIComponent(query)}`, { signal: AbortSignal.timeout(5000) })

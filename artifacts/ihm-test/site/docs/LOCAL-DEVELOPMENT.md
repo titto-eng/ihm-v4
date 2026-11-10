@@ -110,7 +110,8 @@ or counted as passing by `local:check`.
 
 1. `git switch -c feature/your-change`
 2. Edit locally, run the checks above, commit and push the branch.
-3. Open a pull request into `main`. GitHub runs **IHM checks / Site checks and build**.
+3. Open a pull request into `main`. GitHub runs **IHM checks / Site checks and build**
+   and **Enquiry, payment and portal integration**.
 4. Merge after checks and review. In GitHub repository settings, optionally require this
    status check and a review through a branch rule; the workflow does not set that rule.
 5. Pull `main` into the Replit workspace. Resolve any competing workspace edits instead
@@ -126,8 +127,37 @@ or counted as passing by `local:check`.
 The GitHub workflow has read-only repository permissions and a disposable PostgreSQL
 service. It generates its own throwaway secrets and builds without the real content
 bundle. It does not publish, connect to Replit/AWS databases, or require your secrets.
-A green check confirms code compilation and the listed checks, not full-content parity,
-the full integration suite, or a successful Replit publish.
+A green check confirms code compilation and the listed checks, not full-content parity
+or a successful Replit publish.
+
+### Fixture-dependent PR checks
+
+The separate integration job uses PostgreSQL 16 (`ihm_local_integration`), MySQL 8
+(`ihmedu_portal`) and Mailpit. All are disposable GitHub service containers. The
+documented `docker/portal-fixtures/load.sh` loads all four committed SQL files and
+restricts `portal_ro` to SELECT and `portal_pay` to the payment-only grants.
+No live database, dump, credentials, Replit storage, or content refresh is involved.
+
+`npm run test:integration:ci` starts subprocesses with an allowlisted environment,
+fresh random signing secrets, loopback database/SMTP endpoints, fake gateways,
+dry-run adapters and tracking disabled. It initializes the empty PostgreSQL schema
+once, then runs all enquiry, payment and portal `.test.ts` and `.test.tsx` files
+serially, so reconciliation and email assertions do not race other suites.
+Payment receipt assertions fail if Mailpit disappears. Unmocked external fetches
+are rejected; gateway contract tests use injected fakes, never live credentials.
+This harness does not use the hosted Replit email/portal kill switches, because
+those would prevent the very fixture writes and Mailpit deliveries being checked.
+Do not use it against a shared database.
+
+The job uploads JUnit results and `coverage.txt` even on failure. The original
+`npm run test:int` remains the wider archive/content suite. Its course importer
+and section mapper require missing `data/ihm/courses.json` and `v2/ihm/pages.csv`;
+the enquiry provenance cross-check also requires `v2/ihm/enquiries.csv`.
+The integration job prints an explicit warning and records these missing inputs
+in its coverage report rather than claiming archive checks passed. The committed
+enquiry JSON request fixtures still run. Do not fabricate the missing inventory
+from current application output, download it live in CI, or copy private records
+to make those archive checks green.
 
 ## 5. What changes when?
 

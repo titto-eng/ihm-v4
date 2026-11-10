@@ -15,6 +15,21 @@ The handover's full integration suite requires separate portal MySQL and Mailpit
 
 **How to apply:** Report fixture-blocked tests accurately; never enable live services to make the test suite pass.
 
+The hosted test-site kill switches are not suitable for fixture integration tests:
+they deliberately reject email delivery and portal payment writes. Keep them enabled
+for schema generation (with local file storage), but use a separate, closed
+environment for fixture tests with loopback databases/SMTP and fake gateways.
+
+**Why:** Disabling the storage plugin during development schema generation also
+regenerates Payload types without storage metadata; test workers also auto-generate
+types unless explicitly disabled. Leaving all hosted kill switches
+enabled during tests instead prevents payment and receipt assertions from exercising
+their intended paths.
+
+**How to apply:** Never inherit hosting credentials into integration subprocesses.
+Distinguish fixture-backed regression coverage from unavailable archive-inventory
+provenance checks; report missing inputs without downloading live content.
+
 Local file storage must remain independent of the test site's safety mode.
 
 **Why:** Turning off the test-site flag just to avoid Replit's storage service would also turn off payment, portal, email and admin safeguards. Laptop development still needs those safeguards.

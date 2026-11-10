@@ -55,4 +55,65 @@ jobs:
       - name: Production compilation against an empty fixture database
         run: npm run local:build
       # No deployment secrets, content dumps, shared App Storage, or publish action.
-      # Full integration tests require the separate MySQL/Mailpit fixtures.
+      # Fixture-dependent checks run separately below.
+
+  integration:
+    name: Enquiry, payment and portal integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: artifacts/ihm-test/site
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ihm_local_integration
+        ports: ['5433:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d ihm_local_integration"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+      portal-mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: ihmedu_portal
+          MYSQL_USER: portal_ro
+          MYSQL_PASSWORD: portal_ro
+        ports: ['3307:3306']
+        options: >-
+          --health-cmd "mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval 5s --health-timeout 5s --health-retries 24
+      mailpit:
+        image: axllent/mailpit:v1.27
+        ports: ['1025:1025', '8025:8025']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: artifacts/ihm-test/site/package-lock.json
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Load portal fixtures and least-privilege grants
+        env:
+          PORTAL_FIXTURE_CONTAINER: ${{ job.services.portal-mysql.id }}
+        run: bash docker/portal-fixtures/load.sh
+      - name: Initialize disposable schema and run integration suites
+        run: |
+          curl --fail --silent --show-error --retry 12 --retry-connrefused --retry-delay 1 \
+            http://127.0.0.1:8025/api/v1/info > /dev/null
+          npm run test:integration:ci
+          git diff --exit-code -- src/payload-types.ts
+      - name: Retain integration results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ihm-integration-results
+          path: artifacts/ihm-test/site/generated-artifacts/integration/
+          if-no-files-found: warn
+          retention-days: 7
+      # No repository/environment secrets or shared database/storage connections.

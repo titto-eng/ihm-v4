@@ -37,7 +37,9 @@ export default buildConfig({
   telemetry: false, // no usage data sent to payloadcms.com (and no failed lookups on servers without outbound access)
   jobs: jobsConfig, // 40-enquiries: deliverEnquiry on queue `enquiries`
   email: buildEmailAdapter(), // Resend, or SMTP (Mailpit) in dev
-  typescript: { outputFile: path.resolve(dirname, 'payload-types.ts') },
+  // Fixture tests may omit hosted plugins; never rewrite committed types from
+  // that narrower config. Generate once during schema setup / generate:types.
+  typescript: { outputFile: path.resolve(dirname, 'payload-types.ts'), autoGenerate: env.NODE_ENV !== 'test' },
   db: postgresAdapter({
     pool: { connectionString: env.DATABASE_URL },
     blocksAsJSON: true, // D9: layouts are JSON; new block types need no migration
